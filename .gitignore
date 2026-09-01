@@ -1,0 +1,22 @@
+# Secretos: nunca deben subirse al repositorio
+.env
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs y datos generados (contienen solo actividad técnica, no se versionan)
+logs/*.log
+data/*.db
+data/*.sqlite3
+
+# Archivos del sistema operativo / editor
+.DS_Store
+.vscode/
+.idea/
