@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Error — Panel de TAMAGO{% endblock %}
+{% block content %}
+<div class="card error">
+    <h1>⚠️ Algo no salió bien</h1>
+    <p>{{ mensaje }}</p>
+    <a href="/">Volver al inicio</a>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Panel de TAMAGO{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>🐣 Bienvenido, {{ username }}</h1>
+    <p>Sesión iniciada correctamente con Discord.</p>
+    <p>Estado de la base de datos: <strong>{{ db_status }}</strong></p>
+
+    <div class="proximamente">
+        <p>Las siguientes secciones llegan en las próximas sub-etapas:</p>
+        <ul>
+            <li>Editar personalidad</li>
+            <li>Configurar canales y permisos por servidor</li>
+            <li>Ver registros de actividad</li>
+            <li>Apagar / reiniciar el bot</li>
+        </ul>
+    </div>
+
+    <a class="salir" href="/logout">Cerrar sesión</a>
+</div>
+{% endblock %}
