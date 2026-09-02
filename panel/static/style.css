@@ -170,7 +170,12 @@ h1 { margin-top: 0; }
     pointer-events: none;
 }
 
-.sidebar-nav .icono {
+.sidebar-nav .icono,
+.stat-label .icono,
+.accion-titulo .icono,
+.proximamente-lista .icono,
+.sidebar-brand .icono,
+.titulo-icono .icono {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
@@ -244,6 +249,11 @@ h1 { margin-top: 0; }
     width: 32px;
     height: 32px;
     border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.topbar-user .avatar-inicial {
     background: var(--accent-soft);
     color: var(--accent-dark);
     display: flex;
@@ -371,6 +381,17 @@ h1 { margin-top: 0; }
     padding: 0.5rem 0.75rem;
     background: var(--bg);
     border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.proximamente-lista li .icono { flex-shrink: 0; }
+
+.titulo-icono {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* -------------------------------------------------------------------
@@ -462,4 +483,62 @@ h1 { margin-top: 0; }
     .sidebar-footer { display: none; }
     .main-content { padding: 1.25rem; }
     .topbar { padding: 1rem 1.25rem; }
+}
+
+/* -------------------------------------------------------------------
+   Pantalla de Registros
+   ------------------------------------------------------------------- */
+
+.registro-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.registro-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg);
+    border-radius: 10px;
+}
+
+.registro-badge {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.registro-badge svg { width: 16px; height: 16px; }
+
+.registro-badge--bloqueo { background: #fdf3e0; color: #8a5a12; }
+.registro-badge--error { background: var(--error-bg); color: var(--error-text); }
+.registro-badge--comando { background: var(--accent-soft); color: var(--accent-dark); }
+
+.registro-contenido { min-width: 0; }
+
+.registro-descripcion {
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.registro-meta {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 0.2rem;
+}
+
+.registro-vacio {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
 }

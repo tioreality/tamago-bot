@@ -1,0 +1,47 @@
+{% extends "panel_base.html" %}
+{% block title %}Registros — Panel de TAMAGO{% endblock %}
+{% block page_title %}Registros{% endblock %}
+{% block content %}
+
+<div class="panel-card">
+    <h2 class="titulo-icono">
+        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Actividad reciente
+    </h2>
+    <p class="descripcion">
+        Últimos 50 eventos guardados por TAMAGO (respuestas bloqueadas, errores, etc.).
+        Complemento visual a los logs técnicos del servicio en Railway.
+    </p>
+
+    {% if error_registros %}
+    <div class="aviso-error">⚠️ {{ error_registros }}</div>
+    {% elif not eventos %}
+    <div class="registro-vacio">Todavía no hay eventos registrados.</div>
+    {% else %}
+    <ul class="registro-lista">
+        {% for evento in eventos %}
+        <li class="registro-item">
+            <span class="registro-badge registro-badge--{{ evento.tipo }}">
+                {% if evento.tipo == 'bloqueo' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>
+                {% elif evento.tipo == 'error' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L14.7 3.86a2 2 0 00-3.4 0z"/></svg>
+                {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>
+                {% endif %}
+            </span>
+            <div class="registro-contenido">
+                <div class="registro-descripcion">{{ evento.descripcion }}</div>
+                <div class="registro-meta">
+                    {{ evento.fecha }}
+                    {% if evento.canal_id %} · canal {{ evento.canal_id }}{% endif %}
+                    {% if evento.usuario_id %} · usuario {{ evento.usuario_id }}{% endif %}
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+
+{% endblock %}

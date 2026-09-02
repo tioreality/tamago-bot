@@ -5,7 +5,7 @@
 
 <div class="stat-grid">
     <div class="stat-card">
-        <div class="stat-label">🗄️ Base de datos</div>
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg> Base de datos</div>
         <div class="stat-value">
             {% if db_status == "conectada" %}
                 <span class="stat-pill ok">● Conectada</span>
@@ -16,7 +16,7 @@
     </div>
 
     <div class="stat-card">
-        <div class="stat-label">🎭 Personalidad activa</div>
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg> Personalidad activa</div>
         <div class="stat-value">
             {% if personalidad_nombre %}
                 {{ personalidad_nombre }}
@@ -27,7 +27,7 @@
     </div>
 
     <div class="stat-card">
-        <div class="stat-label">👤 Sesión activa</div>
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sesión activa</div>
         <div class="stat-value" style="font-size: 1.05rem;">{{ username }}</div>
     </div>
 </div>
@@ -35,8 +35,12 @@
 <div class="panel-card">
     <h2>Acciones rápidas</h2>
     <div class="acciones-rapidas">
+        <a class="accion" href="/registros">
+            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg> Ver registros</div>
+            <div class="accion-detalle">Últimos bloqueos y eventos del bot.</div>
+        </a>
         <a class="accion" href="/personalidad">
-            <div class="accion-titulo">🎭 Editar personalidad</div>
+            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg> Editar personalidad</div>
             <div class="accion-detalle">Cambia cómo habla y se comporta TAMAGO.</div>
         </a>
     </div>
@@ -46,10 +50,9 @@
     <h2>Próximamente</h2>
     <p class="descripcion">Estas secciones llegan en las siguientes etapas del proyecto.</p>
     <ul class="proximamente-lista">
-        <li>📡 Configurar canales y permisos por servidor (Etapa 3)</li>
-        <li>🤝 Conversaciones controladas entre bots (Etapa 3)</li>
-        <li>📋 Ver registros de actividad (Etapa 4)</li>
-        <li>🛑 Apagar / reiniciar el bot desde aquí (Etapa 4)</li>
+        <li><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg> Configurar canales y permisos por servidor (Etapa 3)</li>
+        <li><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> Conversaciones controladas entre bots (Etapa 3)</li>
+        <li><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg> Apagar / reiniciar el bot desde aquí (Etapa 4)</li>
     </ul>
 </div>
 

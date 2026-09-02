@@ -32,9 +32,9 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from .config import PanelConfigError, load_panel_config
-from .auth import AuthError, build_authorize_url, exchange_code_for_user, user_is_admin
+from .auth import AuthError, build_authorize_url, build_avatar_url, exchange_code_for_user, user_is_admin
 from .personalidad import PersonalityForm, get_personality, save_personality
-from shared.db import DBConfigError, get_engine, init_db
+from shared.db import BotEvent, DBConfigError, get_engine, init_db, session_scope
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("tamago.panel")
@@ -148,6 +148,7 @@ async def auth_callback(request: Request, code: str = "", state: str = "", error
 
     request.session["user_id"] = discord_user["id"]
     request.session["username"] = discord_user.get("username", "Admin")
+    request.session["avatar_url"] = build_avatar_url(discord_user)
     logger.info("Login exitoso en el panel: %s (%s)", discord_user.get("username"), discord_user["id"])
     return RedirectResponse("/dashboard")
 
@@ -193,7 +194,56 @@ async def dashboard(request: Request):
             "username": request.session.get("username"),
             "db_status": db_status,
             "personalidad_nombre": personalidad_nombre,
+            "avatar_url": request.session.get("avatar_url"),
             "active_page": "dashboard",
+        },
+    )
+
+
+@app.get("/registros", response_class=HTMLResponse)
+async def registros(request: Request):
+    error = _config_check(request)
+    if error:
+        return error
+
+    if not request.session.get("user_id"):
+        return RedirectResponse("/")
+
+    eventos = []
+    error_registros = None
+    try:
+        with session_scope() as session:
+            filas = (
+                session.query(BotEvent)
+                .order_by(BotEvent.created_at.desc())
+                .limit(50)
+                .all()
+            )
+            eventos = [
+                {
+                    "fecha": fila.created_at.strftime("%d/%m/%Y %H:%M:%S") if fila.created_at else "--",
+                    "tipo": fila.event_type,
+                    "descripcion": fila.description,
+                    "canal_id": fila.channel_id,
+                    "usuario_id": fila.user_id,
+                }
+                for fila in filas
+            ]
+    except DBConfigError as e:
+        error_registros = str(e)
+    except Exception as e:
+        logger.error("Error leyendo registros desde la base de datos: %s", e)
+        error_registros = "No se pudieron leer los registros desde la base de datos. Intenta de nuevo."
+
+    return templates.TemplateResponse(
+        request,
+        "registros.html",
+        {
+            "username": request.session.get("username"),
+            "avatar_url": request.session.get("avatar_url"),
+            "active_page": "registros",
+            "eventos": eventos,
+            "error_registros": error_registros,
         },
     )
 
@@ -227,6 +277,7 @@ async def personalidad_form(request: Request):
             "username": request.session.get("username"),
             "personalidad": data,
             "guardado": False,
+            "avatar_url": request.session.get("avatar_url"),
             "active_page": "personalidad",
         },
     )
@@ -272,6 +323,7 @@ async def personalidad_guardar(
                 "personalidad": data,
                 "guardado": False,
                 "error_validacion": "El nombre y el texto de personalidad son obligatorios.",
+                "avatar_url": request.session.get("avatar_url"),
                 "active_page": "personalidad",
             },
             status_code=400,
@@ -302,6 +354,7 @@ async def personalidad_guardar(
             "username": request.session.get("username"),
             "personalidad": data,
             "guardado": True,
+            "avatar_url": request.session.get("avatar_url"),
             "active_page": "personalidad",
         },
     )

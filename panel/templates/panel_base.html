@@ -10,7 +10,7 @@
     <div class="app-shell">
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <span class="huevo">🐣</span>
+                <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4.5 0 7-3.5 7-8 0-5-3-9-7-9s-7 4-7 9c0 4.5 2.5 8 7 8z"/><path d="M9 9l2 2-2 2 3 3"/></svg>
                 <span>Panel de TAMAGO</span>
             </div>
 
@@ -35,10 +35,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="deshabilitado" title="Llega en la Etapa 4 del proyecto">
+                    <a href="/registros" class="{{ 'activo' if active_page == 'registros' else '' }}">
                         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
                         Registros
-                        <span class="badge-pronto">Pronto</span>
                     </a>
                 </li>
                 <li>
@@ -62,7 +61,11 @@
             <header class="topbar">
                 <h1>{% block page_title %}Panel de TAMAGO{% endblock %}</h1>
                 <div class="topbar-user">
-                    <span class="avatar">{{ (username or "?")[:1] | upper }}</span>
+                    {% if avatar_url %}
+                    <img class="avatar" src="{{ avatar_url }}" alt="">
+                    {% else %}
+                    <span class="avatar avatar-inicial">{{ (username or "?")[:1] | upper }}</span>
+                    {% endif %}
                     <span>{{ username }}</span>
                 </div>
             </header>

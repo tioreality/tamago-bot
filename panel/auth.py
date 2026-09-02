@@ -35,6 +35,30 @@ class AuthError(Exception):
     """Error durante el proceso de login (code inválido, Discord no responde, etc.)."""
 
 
+def build_avatar_url(discord_user: dict) -> str:
+    """
+    Arma la URL de la foto de perfil de Discord de esta persona. Si no
+    tiene una foto propia, usa el avatar por defecto que Discord le
+    asigna a todo el mundo (no hay ningún caso sin foto que mostrar).
+    """
+    user_id = discord_user.get("id", "")
+    avatar_hash = discord_user.get("avatar")
+
+    if avatar_hash:
+        extension = "gif" if avatar_hash.startswith("a_") else "png"
+        return f"https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.{extension}?size=64"
+
+    # Sin foto propia: avatar por defecto. Discord calcula cuál según si
+    # la cuenta ya migró al sistema de nombres nuevo (discriminator "0")
+    # o todavia usa el viejo (discriminator de 4 digitos, ej. "#1234").
+    discriminator = discord_user.get("discriminator", "0")
+    if discriminator and discriminator != "0":
+        indice = int(discriminator) % 5
+    else:
+        indice = (int(user_id) >> 22) % 6 if user_id.isdigit() else 0
+    return f"https://cdn.discordapp.com/embed/avatars/{indice}.png"
+
+
 def build_authorize_url(config: PanelConfig, state: str) -> str:
     params = {
         "client_id": config.discord_client_id,
