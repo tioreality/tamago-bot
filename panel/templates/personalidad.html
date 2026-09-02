@@ -1,10 +1,11 @@
-{% extends "base.html" %}
+{% extends "panel_base.html" %}
 {% block title %}Personalidad de TAMAGO — Panel de TAMAGO{% endblock %}
-{% block container_extra_class %} ancho{% endblock %}
+{% block page_title %}Personalidad{% endblock %}
 {% block content %}
-<div class="card texto-izquierda">
-    <h1>🐣 Personalidad de TAMAGO</h1>
-    <p class="nota">
+
+<div class="panel-card texto-izquierda">
+    <h2>🎭 Personalidad de TAMAGO</h2>
+    <p class="descripcion">
         Este texto es lo que TAMAGO usa como base para responder con IA.
         Los cambios se guardan directo en la base de datos — el bot los
         toma en su próxima respuesta, sin reiniciar nada.
@@ -47,13 +48,10 @@
         <textarea id="presentation_message" name="presentation_message" rows="2">{{ personalidad.presentation_message }}</textarea>
         <p class="ayuda">
             Lo que TAMAGO diría al presentarse en un canal por primera vez.
-            (Todavía no está conectado a las respuestas reales de Discord — eso
-            llega en la siguiente sub-etapa, junto con los comandos slash.)
         </p>
 
         <button type="submit" class="boton-guardar">Guardar cambios</button>
     </form>
-
-    <a class="salir" href="/dashboard">← Volver al dashboard</a>
 </div>
+
 {% endblock %}

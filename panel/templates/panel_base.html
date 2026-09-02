@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel de TAMAGO{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="huevo">🐣</span>
+                <span>Panel de TAMAGO</span>
+            </div>
+
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="/dashboard" class="{{ 'activo' if active_page == 'dashboard' else '' }}">
+                        <span class="icono">🏠</span> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="/personalidad" class="{{ 'activo' if active_page == 'personalidad' else '' }}">
+                        <span class="icono">🎭</span> Personalidad
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="deshabilitado" title="Llega en la Etapa 3 del proyecto">
+                        <span class="icono">📡</span> Canales
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="deshabilitado" title="Llega en la Etapa 4 del proyecto">
+                        <span class="icono">📋</span> Registros
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="deshabilitado" title="Llega en la Etapa 4 del proyecto">
+                        <span class="icono">⚙️</span> Configuración
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a href="/logout">🚪 Cerrar sesión</a>
+            </div>
+        </aside>
+
+        <div class="main-area">
+            <header class="topbar">
+                <h1>{% block page_title %}Panel de TAMAGO{% endblock %}</h1>
+                <div class="topbar-user">
+                    <span class="avatar">{{ (username or "?")[:1] | upper }}</span>
+                    <span>{{ username }}</span>
+                </div>
+            </header>
+
+            <main class="main-content">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>

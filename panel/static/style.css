@@ -1,10 +1,39 @@
+/* =========================================================================
+   Panel de TAMAGO -- hoja de estilos
+   Paleta: sidebar oscuro morado/azul, contenido claro con tarjetas
+   redondeadas. Mismo archivo sirve tanto para las pantallas de
+   login/error (tarjeta centrada, sin sidebar) como para las pantallas
+   de administracion (dashboard, personalidad) que usan panel_base.html.
+   ========================================================================= */
+
 :root {
     color-scheme: light dark;
-    --bg: #faf8f5;
+
+    --bg: #f4f5fb;
     --card-bg: #ffffff;
-    --text: #2b2b2b;
-    --accent: #5865F2; /* color oficial de Discord, para el botón de login */
-    --border: #e5e0d8;
+    --text: #1f2133;
+    --text-dim: #6b6f8a;
+    --border: #e6e7f2;
+
+    --accent: #5b4fe9;      /* morado/azul principal */
+    --accent-dark: #4739d6;
+    --accent-soft: #eeecfd; /* fondo suave del acento, para chips/activos */
+
+    --discord: #5865F2;     /* color oficial de Discord, botón de login */
+
+    --sidebar-bg: #14152b;
+    --sidebar-text: #b9bad6;
+    --sidebar-text-active: #ffffff;
+
+    --ok-bg: #e6f4ea;
+    --ok-border: #b7dfc4;
+    --ok-text: #1e5f3c;
+
+    --error-bg: #fbeaea;
+    --error-border: #e0a0a0;
+    --error-text: #7a2020;
+
+    --shadow: 0 1px 2px rgba(20, 21, 43, 0.04), 0 8px 24px rgba(20, 21, 43, 0.06);
 }
 
 * { box-sizing: border-box; }
@@ -16,22 +45,33 @@ body {
     color: var(--text);
 }
 
+a { color: inherit; }
+
+/* -------------------------------------------------------------------
+   Pantallas sin sesión: login / error (tarjeta centrada, sin sidebar)
+   ------------------------------------------------------------------- */
+
 .container {
     max-width: 480px;
     margin: 10vh auto;
     padding: 0 1rem;
 }
 
+.container.ancho {
+    max-width: 760px;
+}
+
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 2rem;
     text-align: center;
+    box-shadow: var(--shadow);
 }
 
 .card.error {
-    border-color: #e0a0a0;
+    border-color: var(--error-border);
 }
 
 h1 { margin-top: 0; }
@@ -40,43 +80,281 @@ h1 { margin-top: 0; }
     display: inline-block;
     margin-top: 1rem;
     padding: 0.75rem 1.5rem;
-    background: var(--accent);
+    background: var(--discord);
     color: white;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
 }
 
 .nota {
     margin-top: 1.5rem;
     font-size: 0.85rem;
-    opacity: 0.7;
-}
-
-.proximamente {
-    text-align: left;
-    margin: 1.5rem 0;
-    padding: 1rem;
-    background: var(--bg);
-    border-radius: 8px;
+    color: var(--text-dim);
 }
 
 .salir {
     display: inline-block;
     margin-top: 1rem;
+    color: var(--text-dim);
+    text-decoration: none;
+}
+
+.salir:hover { color: var(--text); }
+
+/* -------------------------------------------------------------------
+   App shell (panel_base.html): sidebar + topbar + contenido
+   ------------------------------------------------------------------- */
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 0.5rem 1.5rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--sidebar-text-active);
+}
+
+.sidebar-brand .huevo { font-size: 1.4rem; }
+
+.sidebar-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--sidebar-text);
+}
+
+.sidebar-nav a:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--sidebar-text-active);
+}
+
+.sidebar-nav a.activo {
+    background: var(--accent);
+    color: var(--sidebar-text-active);
+}
+
+.sidebar-nav a.deshabilitado {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+.sidebar-nav .icono { font-size: 1.05rem; width: 1.3rem; text-align: center; }
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-footer a {
+    display: block;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+}
+
+.sidebar-footer a:hover { color: var(--sidebar-text-active); }
+
+.main-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.topbar h1 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+
+.topbar-user .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.main-content {
+    padding: 2rem;
+    max-width: 1000px;
+    width: 100%;
+}
+
+/* Tarjetas de resumen tipo "stat" en el dashboard */
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.4rem;
+    box-shadow: var(--shadow);
+}
+
+.stat-card .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.stat-pill.ok { background: var(--ok-bg); color: var(--ok-text); }
+.stat-pill.warn { background: #fdf3e0; color: #8a5a12; }
+.stat-pill.error { background: var(--error-bg); color: var(--error-text); }
+
+.panel-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+.panel-card h2 {
+    margin-top: 0;
+    font-size: 1.05rem;
+}
+
+.panel-card p.descripcion {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+}
+
+.acciones-rapidas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.accion {
+    display: block;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
     color: var(--text);
-    opacity: 0.7;
+    background: var(--bg);
 }
 
-/* --- Pantalla de personalidad (Etapa 2, sub-etapa 2) --- */
+.accion:hover { border-color: var(--accent); }
 
-.container.ancho {
-    max-width: 760px;
+.accion .accion-titulo {
+    font-weight: 600;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
-.texto-izquierda {
-    text-align: left;
+.accion .accion-detalle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
 }
+
+.proximamente-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.proximamente-lista li {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    padding: 0.5rem 0.75rem;
+    background: var(--bg);
+    border-radius: 8px;
+}
+
+/* -------------------------------------------------------------------
+   Formulario de personalidad
+   ------------------------------------------------------------------- */
+
+.texto-izquierda { text-align: left; }
 
 .form-personalidad label {
     display: block;
@@ -99,13 +377,18 @@ h1 { margin-top: 0; }
     box-sizing: border-box;
 }
 
-.form-personalidad textarea {
-    resize: vertical;
+.form-personalidad input[type="text"]:focus,
+.form-personalidad textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--card-bg);
 }
+
+.form-personalidad textarea { resize: vertical; }
 
 .form-personalidad .ayuda {
     font-size: 0.8rem;
-    opacity: 0.7;
+    color: var(--text-dim);
     margin-top: 0.25rem;
 }
 
@@ -113,35 +396,47 @@ h1 { margin-top: 0; }
     display: inline-block;
     margin-top: 1.5rem;
     padding: 0.75rem 1.5rem;
-    background: #2f8f5b;
+    background: var(--accent);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
 }
 
-.boton-guardar:hover {
-    background: #257048;
-}
+.boton-guardar:hover { background: var(--accent-dark); }
 
 .aviso-guardado {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
-    background: #e6f4ea;
-    border: 1px solid #b7dfc4;
+    background: var(--ok-bg);
+    border: 1px solid var(--ok-border);
     border-radius: 8px;
-    color: #1e5f3c;
+    color: var(--ok-text);
     font-size: 0.9rem;
 }
 
 .aviso-error {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
-    background: #fbeaea;
-    border: 1px solid #e0a0a0;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
     border-radius: 8px;
-    color: #7a2020;
+    color: var(--error-text);
     font-size: 0.9rem;
+}
+
+/* -------------------------------------------------------------------
+   Responsive: sidebar arriba en pantallas angostas
+   ------------------------------------------------------------------- */
+
+@media (max-width: 780px) {
+    .app-shell { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; align-items: center; padding: 0.75rem 1rem; }
+    .sidebar-brand { padding: 0; margin-right: 1rem; }
+    .sidebar-nav { flex-direction: row; overflow-x: auto; }
+    .sidebar-footer { display: none; }
+    .main-content { padding: 1.25rem; }
+    .topbar { padding: 1rem 1.25rem; }
 }

@@ -176,12 +176,24 @@ async def dashboard(request: Request):
     except Exception as e:  # conexión rechazada, credenciales inválidas, etc.
         db_status = f"error de conexión ({e})"
 
+    # Nombre de la personalidad activa, solo para mostrarlo en el dashboard.
+    # Si la base de datos no responde, no tumbamos el dashboard por esto --
+    # ya se ve el problema arriba, en la tarjeta de "Base de datos".
+    personalidad_nombre = None
+    if db_status == "conectada":
+        try:
+            personalidad_nombre = get_personality("tamago").name or None
+        except Exception:
+            personalidad_nombre = None
+
     return templates.TemplateResponse(
         request,
         "dashboard.html",
         {
             "username": request.session.get("username"),
             "db_status": db_status,
+            "personalidad_nombre": personalidad_nombre,
+            "active_page": "dashboard",
         },
     )
 
@@ -211,7 +223,12 @@ async def personalidad_form(request: Request):
     return templates.TemplateResponse(
         request,
         "personalidad.html",
-        {"username": request.session.get("username"), "personalidad": data, "guardado": False},
+        {
+            "username": request.session.get("username"),
+            "personalidad": data,
+            "guardado": False,
+            "active_page": "personalidad",
+        },
     )
 
 
@@ -255,6 +272,7 @@ async def personalidad_guardar(
                 "personalidad": data,
                 "guardado": False,
                 "error_validacion": "El nombre y el texto de personalidad son obligatorios.",
+                "active_page": "personalidad",
             },
             status_code=400,
         )
@@ -280,7 +298,12 @@ async def personalidad_guardar(
     return templates.TemplateResponse(
         request,
         "personalidad.html",
-        {"username": request.session.get("username"), "personalidad": data, "guardado": True},
+        {
+            "username": request.session.get("username"),
+            "personalidad": data,
+            "guardado": True,
+            "active_page": "personalidad",
+        },
     )
 
 

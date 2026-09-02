@@ -1,24 +1,56 @@
-{% extends "base.html" %}
+{% extends "panel_base.html" %}
 {% block title %}Dashboard — Panel de TAMAGO{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 {% block content %}
-<div class="card">
-    <h1>🐣 Bienvenido, {{ username }}</h1>
-    <p>Sesión iniciada correctamente con Discord.</p>
-    <p>Estado de la base de datos: <strong>{{ db_status }}</strong></p>
 
-    <div class="proximamente texto-izquierda">
-        <p><a href="/personalidad">🐣 Editar personalidad de TAMAGO</a></p>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">🗄️ Base de datos</div>
+        <div class="stat-value">
+            {% if db_status == "conectada" %}
+                <span class="stat-pill ok">● Conectada</span>
+            {% else %}
+                <span class="stat-pill error">● {{ db_status }}</span>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="proximamente">
-        <p>Las siguientes secciones llegan en las próximas sub-etapas:</p>
-        <ul>
-            <li>Configurar canales y permisos por servidor</li>
-            <li>Ver registros de actividad</li>
-            <li>Apagar / reiniciar el bot</li>
-        </ul>
+    <div class="stat-card">
+        <div class="stat-label">🎭 Personalidad activa</div>
+        <div class="stat-value">
+            {% if personalidad_nombre %}
+                {{ personalidad_nombre }}
+            {% else %}
+                <span class="stat-pill warn">Sin configurar</span>
+            {% endif %}
+        </div>
     </div>
 
-    <a class="salir" href="/logout">Cerrar sesión</a>
+    <div class="stat-card">
+        <div class="stat-label">👤 Sesión activa</div>
+        <div class="stat-value" style="font-size: 1.05rem;">{{ username }}</div>
+    </div>
 </div>
+
+<div class="panel-card">
+    <h2>Acciones rápidas</h2>
+    <div class="acciones-rapidas">
+        <a class="accion" href="/personalidad">
+            <div class="accion-titulo">🎭 Editar personalidad</div>
+            <div class="accion-detalle">Cambia cómo habla y se comporta TAMAGO.</div>
+        </a>
+    </div>
+</div>
+
+<div class="panel-card">
+    <h2>Próximamente</h2>
+    <p class="descripcion">Estas secciones llegan en las siguientes etapas del proyecto.</p>
+    <ul class="proximamente-lista">
+        <li>📡 Configurar canales y permisos por servidor (Etapa 3)</li>
+        <li>🤝 Conversaciones controladas entre bots (Etapa 3)</li>
+        <li>📋 Ver registros de actividad (Etapa 4)</li>
+        <li>🛑 Apagar / reiniciar el bot desde aquí (Etapa 4)</li>
+    </ul>
+</div>
+
 {% endblock %}
