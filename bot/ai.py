@@ -11,6 +11,7 @@ configurable llega en una etapa posterior del proyecto.
 """
 
 import logging
+from pathlib import Path
 
 from anthropic import AsyncAnthropic
 
@@ -20,6 +21,23 @@ from .personalidad import ActivePersonality
 logger = logging.getLogger("tamago")
 
 _client: AsyncAnthropic | None = None
+
+# Ficha de referencia (ver bot/reference/tamago_referencia.txt): un resumen
+# parafraseado de las newsletters reales de REALITY, para que TAMAGO no
+# contradiga anecdotas o fechas que la comunidad ya conoce. Se carga una
+# sola vez al importar este archivo; si no existe, simplemente se omite
+# (el bot sigue funcionando igual, solo sin ese contexto extra).
+_REFERENCE_PATH = Path(__file__).resolve().parent / "reference" / "tamago_referencia.txt"
+
+
+def _load_reference() -> str:
+    try:
+        return _REFERENCE_PATH.read_text(encoding="utf-8").strip()
+    except FileNotFoundError:
+        return ""
+
+
+_REFERENCE_TEXT = _load_reference()
 
 
 def _get_client(config: Config) -> AsyncAnthropic:
@@ -49,6 +67,21 @@ SAFETY_RULES = (
 )
 
 
+# Se agrega siempre, junto a SAFETY_RULES: refuerza que la respuesta debe
+# ser relevante a lo que la persona pregunto (no una respuesta generica)
+# y que use varios emojis de su propio estilo -- no solo repetir siempre
+# el mismo emoji de firma al final.
+STYLE_HINT = (
+    "\n\n---\n"
+    "Antes de responder, lee bien el mensaje de la persona y contesta algo "
+    "que tenga relacion directa con lo que pregunto o comento -- evita "
+    "respuestas genericas que servirian para cualquier mensaje.\n"
+    "Usa emojis de tu propio estilo repartidos naturalmente en el mensaje "
+    "(no solo uno de firma al final): varialos segun el tema de cada "
+    "respuesta en vez de repetir siempre el mismo."
+)
+
+
 def build_system_prompt(personality: ActivePersonality) -> str:
     parts = [personality.personality]
 
@@ -61,7 +94,15 @@ def build_system_prompt(personality: ActivePersonality) -> str:
     if personality.forbidden_topics:
         parts.append(f"Temas que debes evitar por completo: {personality.forbidden_topics}.")
 
+    if _REFERENCE_TEXT:
+        parts.append(
+            "\n\nFicha de referencia (para mantener coherencia con anecdotas "
+            "y fechas ya conocidas por la comunidad -- no la cites literalmente, "
+            "usala solo como contexto de fondo):\n" + _REFERENCE_TEXT
+        )
+
     parts.append(SAFETY_RULES)
+    parts.append(STYLE_HINT)
     return "\n".join(parts)
 
 

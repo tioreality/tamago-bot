@@ -146,14 +146,6 @@ def build_bot(config: Config) -> commands.Bot:
 
     @bot.event
     async def on_message(message: discord.Message):
-        # --- DEBUG TEMPORAL: confirma si el evento llega y con que datos ---
-        logger.info(
-            'DEBUG on_message: autor=%s es_bot=%s canal_id=%s contenido=%r menciona_a_tamago=%s',
-            message.author, message.author.bot, message.channel.id,
-            message.content, bot.user in message.mentions,
-        )
-        # --- FIN DEBUG TEMPORAL ---
-
         # Nunca respondemos a otros bots (ni a nosotros mismos): evita
         # bucles y respuestas en cadena entre bots del servidor.
         if message.author.bot:
