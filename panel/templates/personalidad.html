@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Personalidad de TAMAGO — Panel de TAMAGO{% endblock %}
+{% block container_extra_class %} ancho{% endblock %}
+{% block content %}
+<div class="card texto-izquierda">
+    <h1>🐣 Personalidad de TAMAGO</h1>
+    <p class="nota">
+        Este texto es lo que TAMAGO usa como base para responder con IA.
+        Los cambios se guardan directo en la base de datos — el bot los
+        toma en su próxima respuesta, sin reiniciar nada.
+    </p>
+
+    {% if guardado %}
+    <div class="aviso-guardado">✅ Guardado. TAMAGO ya está usando esta personalidad.</div>
+    {% endif %}
+    {% if error_validacion %}
+    <div class="aviso-error">⚠️ {{ error_validacion }}</div>
+    {% endif %}
+
+    <form method="post" action="/personalidad" class="form-personalidad">
+        <label for="name">Nombre del bot</label>
+        <input type="text" id="name" name="name" value="{{ personalidad.name }}" required>
+
+        <label for="description">Descripción corta (uso interno, no la ve la IA)</label>
+        <input type="text" id="description" name="description" value="{{ personalidad.description }}">
+
+        <label for="tone">Tono</label>
+        <input type="text" id="tone" name="tone" value="{{ personalidad.tone }}">
+
+        <label for="language">Idioma</label>
+        <input type="text" id="language" name="language" value="{{ personalidad.language }}">
+
+        <label for="personality">Personalidad (texto completo que recibe la IA)</label>
+        <textarea id="personality" name="personality" rows="16" required>{{ personalidad.personality }}</textarea>
+        <p class="ayuda">
+            Este es el texto principal: define quién es TAMAGO, cómo habla y cómo se
+            comporta. Escríbelo tal como quieras que TAMAGO lo siga al pie de la letra.
+        </p>
+
+        <label for="allowed_topics">Temas permitidos</label>
+        <textarea id="allowed_topics" name="allowed_topics" rows="2">{{ personalidad.allowed_topics }}</textarea>
+
+        <label for="forbidden_topics">Temas prohibidos</label>
+        <textarea id="forbidden_topics" name="forbidden_topics" rows="2">{{ personalidad.forbidden_topics }}</textarea>
+
+        <label for="presentation_message">Mensaje de presentación</label>
+        <textarea id="presentation_message" name="presentation_message" rows="2">{{ personalidad.presentation_message }}</textarea>
+        <p class="ayuda">
+            Lo que TAMAGO diría al presentarse en un canal por primera vez.
+            (Todavía no está conectado a las respuestas reales de Discord — eso
+            llega en la siguiente sub-etapa, junto con los comandos slash.)
+        </p>
+
+        <button type="submit" class="boton-guardar">Guardar cambios</button>
+    </form>
+
+    <a class="salir" href="/dashboard">← Volver al dashboard</a>
+</div>
+{% endblock %}

@@ -67,3 +67,81 @@ h1 { margin-top: 0; }
     color: var(--text);
     opacity: 0.7;
 }
+
+/* --- Pantalla de personalidad (Etapa 2, sub-etapa 2) --- */
+
+.container.ancho {
+    max-width: 760px;
+}
+
+.texto-izquierda {
+    text-align: left;
+}
+
+.form-personalidad label {
+    display: block;
+    margin-top: 1.25rem;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-personalidad input[type="text"],
+.form-personalidad textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: var(--bg);
+    color: var(--text);
+    box-sizing: border-box;
+}
+
+.form-personalidad textarea {
+    resize: vertical;
+}
+
+.form-personalidad .ayuda {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+}
+
+.boton-guardar {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #2f8f5b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.boton-guardar:hover {
+    background: #257048;
+}
+
+.aviso-guardado {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: #e6f4ea;
+    border: 1px solid #b7dfc4;
+    border-radius: 8px;
+    color: #1e5f3c;
+    font-size: 0.9rem;
+}
+
+.aviso-error {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fbeaea;
+    border: 1px solid #e0a0a0;
+    border-radius: 8px;
+    color: #7a2020;
+    font-size: 0.9rem;
+}

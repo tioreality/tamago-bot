@@ -28,6 +28,17 @@ class Config:
     guild_id: int | None
     log_level: str
 
+    # --- Respuestas con IA (Etapa 2) ---
+    anthropic_api_key: str
+    anthropic_model: str
+    # Canales de Discord donde TAMAGO puede responder con IA. Vacio por
+    # defecto a propósito (nadie autorizado todavía) -- hay que llenarlo
+    # a mano en el .env con los IDs de canal reales antes de que TAMAGO
+    # responda a menciones en algún lado.
+    ai_allowed_channel_ids: frozenset[int]
+    ai_cooldown_seconds: int
+    ai_max_responses_per_minute: int
+
 
 def _get_optional_int(name: str) -> int | None:
     raw = os.getenv(name, "").strip()
@@ -40,6 +51,39 @@ def _get_optional_int(name: str) -> int | None:
             f"La variable {name} debe ser un número entero (ID de Discord). "
             f"Valor recibido: {raw!r}"
         )
+
+
+def _get_positive_int(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        valor = int(raw)
+    except ValueError:
+        raise ConfigError(f"La variable {name} debe ser un número entero. Valor recibido: {raw!r}")
+    if valor <= 0:
+        raise ConfigError(f"La variable {name} debe ser mayor que 0. Valor recibido: {raw!r}")
+    return valor
+
+
+def _get_channel_id_set(name: str) -> "frozenset[int]":
+    """Lee una lista de IDs de canal de Discord separados por comas."""
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return frozenset()
+    ids = []
+    for pedazo in raw.split(","):
+        pedazo = pedazo.strip()
+        if not pedazo:
+            continue
+        try:
+            ids.append(int(pedazo))
+        except ValueError:
+            raise ConfigError(
+                f"La variable {name} debe ser una lista de IDs de canal separados por "
+                f"comas (ej. 111,222,333). Valor recibido: {raw!r}"
+            )
+    return frozenset(ids)
 
 
 def load_config() -> Config:
@@ -64,9 +108,31 @@ def load_config() -> Config:
             f"LOG_LEVEL={log_level!r} no es válido. Usa uno de: {', '.join(sorted(valid_levels))}."
         )
 
+    anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+    if not anthropic_api_key or anthropic_api_key == "tu_api_key_aqui":
+        raise ConfigError(
+            "Falta ANTHROPIC_API_KEY en el archivo .env (o sigue con el valor de ejemplo). "
+            "Es obligatoria a partir de la Etapa 2, para que TAMAGO pueda responder con IA. "
+            "Consíguela en: https://console.anthropic.com/settings/keys"
+        )
+
+    # El modelo es configurable para no tener que tocar código si Anthropic
+    # publica un modelo nuevo o si este deja de estar disponible. Lista
+    # actualizada de modelos: https://docs.claude.com/en/docs/about-claude/models
+    anthropic_model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929").strip()
+
+    ai_allowed_channel_ids = _get_channel_id_set("AI_ALLOWED_CHANNEL_IDS")
+    ai_cooldown_seconds = _get_positive_int("AI_COOLDOWN_SECONDS", 8)
+    ai_max_responses_per_minute = _get_positive_int("AI_MAX_RESPONSES_PER_MINUTE", 10)
+
     return Config(
         discord_token=token,
         command_prefix=prefix,
         guild_id=guild_id,
         log_level=log_level,
+        anthropic_api_key=anthropic_api_key,
+        anthropic_model=anthropic_model,
+        ai_allowed_channel_ids=ai_allowed_channel_ids,
+        ai_cooldown_seconds=ai_cooldown_seconds,
+        ai_max_responses_per_minute=ai_max_responses_per_minute,
     )

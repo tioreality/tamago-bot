@@ -25,14 +25,16 @@ Y abrir http://localhost:8000 en el navegador.
 import logging
 import secrets
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from .config import PanelConfigError, load_panel_config
 from .auth import AuthError, build_authorize_url, exchange_code_for_user, user_is_admin
-from shared.db import DBConfigError, get_engine
+from .personalidad import PersonalityForm, get_personality, save_personality
+from shared.db import DBConfigError, get_engine, init_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("tamago.panel")
@@ -40,6 +42,7 @@ logger = logging.getLogger("tamago.panel")
 templates = Jinja2Templates(directory="panel/templates")
 
 app = FastAPI(title="Panel de TAMAGO")
+app.mount("/static", StaticFiles(directory="panel/static"), name="static")
 
 try:
     config = load_panel_config()
@@ -53,6 +56,19 @@ except PanelConfigError as e:
     app.add_middleware(SessionMiddleware, secret_key=secrets.token_hex(32))
 else:
     _config_error = None
+
+
+@app.on_event("startup")
+async def _preparar_base_de_datos():
+    """Crea las tablas que falten (ej. bot_personalities) al arrancar."""
+    if _config_error:
+        return
+    try:
+        init_db()
+    except DBConfigError as e:
+        logger.warning("No se pudo preparar la base de datos al iniciar: %s", e)
+    except Exception as e:  # conexión rechazada, credenciales inválidas, etc.
+        logger.warning("Error inesperado preparando la base de datos al iniciar: %s", e)
 
 
 def _config_check(request: Request):
@@ -167,6 +183,104 @@ async def dashboard(request: Request):
             "username": request.session.get("username"),
             "db_status": db_status,
         },
+    )
+
+
+@app.get("/personalidad", response_class=HTMLResponse)
+async def personalidad_form(request: Request):
+    error = _config_check(request)
+    if error:
+        return error
+
+    if not request.session.get("user_id"):
+        return RedirectResponse("/")
+
+    try:
+        data = get_personality("tamago")
+    except DBConfigError as e:
+        return templates.TemplateResponse(request, "error.html", {"mensaje": str(e)}, status_code=500)
+    except Exception as e:
+        logger.error("Error leyendo la personalidad desde la base de datos: %s", e)
+        return templates.TemplateResponse(
+            request,
+            "error.html",
+            {"mensaje": "No se pudo leer la personalidad desde la base de datos. Intenta de nuevo."},
+            status_code=502,
+        )
+
+    return templates.TemplateResponse(
+        request,
+        "personalidad.html",
+        {"username": request.session.get("username"), "personalidad": data, "guardado": False},
+    )
+
+
+@app.post("/personalidad", response_class=HTMLResponse)
+async def personalidad_guardar(
+    request: Request,
+    name: str = Form(...),
+    description: str = Form(""),
+    personality: str = Form(...),
+    tone: str = Form(""),
+    language: str = Form(""),
+    allowed_topics: str = Form(""),
+    forbidden_topics: str = Form(""),
+    presentation_message: str = Form(""),
+):
+    error = _config_check(request)
+    if error:
+        return error
+
+    if not request.session.get("user_id"):
+        return RedirectResponse("/")
+
+    data = PersonalityForm(
+        bot_slug="tamago",
+        name=name.strip(),
+        description=description.strip(),
+        personality=personality.strip(),
+        tone=tone.strip(),
+        language=language.strip(),
+        allowed_topics=allowed_topics.strip(),
+        forbidden_topics=forbidden_topics.strip(),
+        presentation_message=presentation_message.strip(),
+    )
+
+    if not data.name or not data.personality:
+        return templates.TemplateResponse(
+            request,
+            "personalidad.html",
+            {
+                "username": request.session.get("username"),
+                "personalidad": data,
+                "guardado": False,
+                "error_validacion": "El nombre y el texto de personalidad son obligatorios.",
+            },
+            status_code=400,
+        )
+
+    try:
+        save_personality(data)
+    except DBConfigError as e:
+        return templates.TemplateResponse(request, "error.html", {"mensaje": str(e)}, status_code=500)
+    except Exception as e:
+        logger.error("Error guardando la personalidad en la base de datos: %s", e)
+        return templates.TemplateResponse(
+            request,
+            "error.html",
+            {"mensaje": "No se pudo guardar la personalidad en la base de datos. Intenta de nuevo."},
+            status_code=502,
+        )
+
+    logger.info(
+        "Personalidad de '%s' actualizada desde el panel por %s",
+        data.bot_slug,
+        request.session.get("username"),
+    )
+    return templates.TemplateResponse(
+        request,
+        "personalidad.html",
+        {"username": request.session.get("username"), "personalidad": data, "guardado": True},
     )
 
 

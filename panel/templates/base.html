@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <main class="container">
+    <main class="container{% block container_extra_class %}{% endblock %}">
         {% block content %}{% endblock %}
     </main>
 </body>

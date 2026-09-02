@@ -15,6 +15,7 @@ import os
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, DateTime, func
+from sqlalchemy.engine import URL
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
@@ -24,7 +25,7 @@ class DBConfigError(Exception):
     """Error de configuración de la base de datos: falta alguna variable obligatoria."""
 
 
-def _build_database_url() -> str:
+def _build_database_url() -> URL:
     host = os.getenv("MYSQL_HOST", "").strip()
     port = os.getenv("MYSQL_PORT", "3306").strip()
     user = os.getenv("MYSQL_USER", "").strip()
@@ -48,9 +49,27 @@ def _build_database_url() -> str:
             + ". Revisa tu archivo .env (o las Variables del servicio en Railway)."
         )
 
-    # pymysql como driver; los valores se escapan automáticamente (nunca se
-    # arma la URL con texto pegado a mano en otras partes del código).
-    return f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4"
+    try:
+        port_int = int(port)
+    except ValueError:
+        raise DBConfigError("MYSQL_PORT debe ser un número (ej. 3306). Revisa tu archivo .env.")
+
+    # Usamos URL.create de SQLAlchemy en vez de pegar el texto a mano
+    # (f"...{password}@{host}..."). Esto es importante: si el usuario o la
+    # contraseña de MySQL tienen caracteres especiales como "@", ":" o "/",
+    # pegar el texto directo arma una URL inválida y SQLAlchemy confunde
+    # dónde termina la contraseña y dónde empieza el host. URL.create
+    # escapa esos caracteres automáticamente sin que tengamos que pensar
+    # en ello.
+    return URL.create(
+        "mysql+pymysql",
+        username=user,
+        password=password,
+        host=host,
+        port=port_int,
+        database=database,
+        query={"charset": "utf8mb4"},
+    )
 
 
 _engine = None
@@ -111,3 +130,47 @@ class BotEvent(Base):
     guild_id = Column(String(32), nullable=True)
     channel_id = Column(String(32), nullable=True)
     user_id = Column(String(32), nullable=True)
+
+
+class BotPersonality(Base):
+    """
+    Personalidad configurable de cada bot. Se edita desde la pantalla
+    "/personalidad" del panel web, y el bot la lee de aquí (no de un
+    archivo de código) para armar el system prompt que le manda a la
+    API de IA en cada respuesta.
+
+    "bot_slug" identifica a qué bot pertenece cada fila (ej. "tamago").
+    Se deja preparado desde ya para la Etapa 3, cuando exista un segundo
+    bot con personalidad distinta, sin tener que cambiar esta tabla.
+
+    Los campos de canales/permisos/límites de frecuencia (parte de la
+    lista completa de "Personalidades de los bots" del proyecto) llegan
+    en la siguiente sub-etapa (pantalla de canales y permisos); por ahora
+    esta tabla solo cubre identidad y tono, que es lo que edita esta
+    pantalla.
+    """
+
+    __tablename__ = "bot_personalities"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    bot_slug = Column(String(50), nullable=False, unique=True)  # ej: "tamago"
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # El texto completo que se usa como system prompt para la IA.
+    personality = Column(Text, nullable=False)
+
+    tone = Column(String(100), nullable=True)  # ej: "cálido y cercano"
+    language = Column(String(50), nullable=True)  # ej: "español neutro"
+
+    # Listas simples separadas por comas (una por línea también sirve).
+    # Se vuelven listas de verdad en la interfaz del panel; guardarlas
+    # como texto plano mantiene esta primera versión simple.
+    allowed_topics = Column(Text, nullable=True)
+    forbidden_topics = Column(Text, nullable=True)
+
+    presentation_message = Column(Text, nullable=True)
+
+    updated_at = Column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
