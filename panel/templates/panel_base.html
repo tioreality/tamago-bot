@@ -17,33 +17,44 @@
             <ul class="sidebar-nav">
                 <li>
                     <a href="/dashboard" class="{{ 'activo' if active_page == 'dashboard' else '' }}">
-                        <span class="icono">🏠</span> Dashboard
+                        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+                        Dashboard
                     </a>
                 </li>
                 <li>
                     <a href="/personalidad" class="{{ 'activo' if active_page == 'personalidad' else '' }}">
-                        <span class="icono">🎭</span> Personalidad
+                        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                        Personalidad
                     </a>
                 </li>
                 <li>
                     <a href="#" class="deshabilitado" title="Llega en la Etapa 3 del proyecto">
-                        <span class="icono">📡</span> Canales
+                        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg>
+                        Canales
+                        <span class="badge-pronto">Pronto</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" class="deshabilitado" title="Llega en la Etapa 4 del proyecto">
-                        <span class="icono">📋</span> Registros
+                        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                        Registros
+                        <span class="badge-pronto">Pronto</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" class="deshabilitado" title="Llega en la Etapa 4 del proyecto">
-                        <span class="icono">⚙️</span> Configuración
+                        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                        Configuración
+                        <span class="badge-pronto">Pronto</span>
                     </a>
                 </li>
             </ul>
 
             <div class="sidebar-footer">
-                <a href="/logout">🚪 Cerrar sesión</a>
+                <a href="/logout">
+                    <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+                    Cerrar sesión
+                </a>
             </div>
         </aside>
 
