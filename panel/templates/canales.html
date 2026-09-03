@@ -1,0 +1,52 @@
+{% extends "panel_base.html" %}
+{% block title %}Canales de {{ current_bot.name }} — Panel de TAMAGO{% endblock %}
+{% block page_title %}Canales{% endblock %}
+{% block content %}
+
+<div class="panel-card texto-izquierda">
+    <h2 class="titulo-icono">
+        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg>
+        Canales donde {{ current_bot.name }} puede responder con IA
+    </h2>
+    <p class="descripcion">
+        Marca los canales donde {{ current_bot.name }} puede responder cuando lo mencionan.
+        Por seguridad, si no marcas ninguno, {{ current_bot.name }} no responderá con IA en ningún
+        lado — comandos como <code>!ping</code> siguen funcionando igual en todos los canales.
+    </p>
+
+    {% if guardado %}
+    <div class="aviso-guardado">✅ Guardado. {{ current_bot.name }} ya está usando esta lista de canales.</div>
+    {% endif %}
+    {% if error_validacion %}
+    <div class="aviso-error">⚠️ {{ error_validacion }}</div>
+    {% endif %}
+
+    <form method="post" action="/bots/{{ current_bot.slug }}/canales" class="form-personalidad">
+        {% if canales_disponibles %}
+        <ul class="canal-lista">
+            {% for canal in canales_disponibles %}
+            <li>
+                <label class="canal-item">
+                    <input type="checkbox" name="canal_id" value="{{ canal.id }}" {% if canal.id in canales_guardados %}checked{% endif %}>
+                    <span># {{ canal.nombre }}</span>
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="aviso-error">
+            ⚠️ No se pudo obtener la lista de canales directamente de Discord ahora mismo
+            (puede ser un problema de red temporal). Escribe los IDs de canal manualmente
+            abajo, uno por línea. Para conseguir un ID: activa el "Modo desarrollador" en
+            Discord (Ajustes de usuario → Avanzado) y haz clic derecho sobre el canal →
+            "Copiar ID de canal".
+        </div>
+        <label for="canales_manual">IDs de canal (uno por línea)</label>
+        <textarea id="canales_manual" name="canales_manual" rows="6">{{ canales_guardados_raw }}</textarea>
+        {% endif %}
+
+        <button type="submit" class="boton-guardar">Guardar cambios</button>
+    </form>
+</div>
+
+{% endblock %}

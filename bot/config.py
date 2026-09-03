@@ -28,14 +28,21 @@ class Config:
     guild_id: int | None
     log_level: str
 
+    # Identifica a este bot dentro de la base de datos compartida (tablas
+    # bot_personalities, bot_settings, bot_events) y en el panel web
+    # (panel/bots_registry.py). Cada uno de los 5 bots tiene su propio
+    # .env con su propio BOT_SLUG. Por defecto "tamago" para no romper
+    # el despliegue actual si todavía no se agregó esta variable.
+    bot_slug: str
+
     # --- Respuestas con IA (Etapa 2) ---
     anthropic_api_key: str
     anthropic_model: str
-    # Canales de Discord donde TAMAGO puede responder con IA. Vacio por
-    # defecto a propósito (nadie autorizado todavía) -- hay que llenarlo
-    # a mano en el .env con los IDs de canal reales antes de que TAMAGO
-    # responda a menciones en algún lado.
-    ai_allowed_channel_ids: frozenset[int]
+    # Nota: los canales autorizados y el interruptor global de IA ya NO
+    # viven aquí -- se movieron a la base de datos (tabla bot_settings,
+    # ver shared/db.py) para poder editarlos desde el panel web
+    # ("Canales" y "Configuración") sin tocar el .env ni redeployar.
+    # Ver bot/ajustes.py.
     ai_cooldown_seconds: int
     ai_max_responses_per_minute: int
 
@@ -64,26 +71,6 @@ def _get_positive_int(name: str, default: int) -> int:
     if valor <= 0:
         raise ConfigError(f"La variable {name} debe ser mayor que 0. Valor recibido: {raw!r}")
     return valor
-
-
-def _get_channel_id_set(name: str) -> "frozenset[int]":
-    """Lee una lista de IDs de canal de Discord separados por comas."""
-    raw = os.getenv(name, "").strip()
-    if not raw:
-        return frozenset()
-    ids = []
-    for pedazo in raw.split(","):
-        pedazo = pedazo.strip()
-        if not pedazo:
-            continue
-        try:
-            ids.append(int(pedazo))
-        except ValueError:
-            raise ConfigError(
-                f"La variable {name} debe ser una lista de IDs de canal separados por "
-                f"comas (ej. 111,222,333). Valor recibido: {raw!r}"
-            )
-    return frozenset(ids)
 
 
 def load_config() -> Config:
@@ -121,18 +108,19 @@ def load_config() -> Config:
     # actualizada de modelos: https://docs.claude.com/en/docs/about-claude/models
     anthropic_model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929").strip()
 
-    ai_allowed_channel_ids = _get_channel_id_set("AI_ALLOWED_CHANNEL_IDS")
     ai_cooldown_seconds = _get_positive_int("AI_COOLDOWN_SECONDS", 8)
     ai_max_responses_per_minute = _get_positive_int("AI_MAX_RESPONSES_PER_MINUTE", 10)
+
+    bot_slug = os.getenv("BOT_SLUG", "tamago").strip() or "tamago"
 
     return Config(
         discord_token=token,
         command_prefix=prefix,
         guild_id=guild_id,
         log_level=log_level,
+        bot_slug=bot_slug,
         anthropic_api_key=anthropic_api_key,
         anthropic_model=anthropic_model,
-        ai_allowed_channel_ids=ai_allowed_channel_ids,
         ai_cooldown_seconds=ai_cooldown_seconds,
         ai_max_responses_per_minute=ai_max_responses_per_minute,
     )

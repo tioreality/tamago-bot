@@ -10,8 +10,16 @@
     <div class="app-shell">
         <aside class="sidebar">
             <div class="sidebar-brand">
+                {% if current_bot and avatares.get(current_bot.slug) %}
+                <img class="bot-avatar bot-avatar-brand" src="{{ avatares.get(current_bot.slug) }}" alt="">
+                {% else %}
                 <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4.5 0 7-3.5 7-8 0-5-3-9-7-9s-7 4-7 9c0 4.5 2.5 8 7 8z"/><path d="M9 9l2 2-2 2 3 3"/></svg>
-                <span>Panel de TAMAGO</span>
+                {% endif %}
+                {% if current_bot %}
+                <span>Panel de {{ current_bot.name }}</span>
+                {% else %}
+                <span>Panel del Bot</span>
+                {% endif %}
             </div>
 
             <ul class="sidebar-nav">
@@ -21,33 +29,53 @@
                         Dashboard
                     </a>
                 </li>
+            </ul>
+
+            <div class="sidebar-section-title">Tus bots</div>
+            <ul class="sidebar-nav">
+                {% for b in bots %}
                 <li>
-                    <a href="/personalidad" class="{{ 'activo' if active_page == 'personalidad' else '' }}">
+                    <a href="/bots/{{ b.slug }}" class="{{ 'activo' if current_bot and current_bot.slug == b.slug and active_page == 'bot_hub' else '' }}">
+                        {% if avatares.get(b.slug) %}
+                        <img class="bot-avatar bot-avatar-mini" src="{{ avatares.get(b.slug) }}" alt="">
+                        {% else %}
+                        <span class="bot-emoji">{{ b.emoji }}</span>
+                        {% endif %}
+                        {{ b.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% if current_bot %}
+            <div class="sidebar-section-title">{{ current_bot.emoji }} {{ current_bot.name }}</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="/bots/{{ current_bot.slug }}/personalidad" class="{{ 'activo' if active_page == 'personalidad' else '' }}">
                         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
                         Personalidad
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="deshabilitado" title="Llega en la Etapa 3 del proyecto">
+                    <a href="/bots/{{ current_bot.slug }}/canales" class="{{ 'activo' if active_page == 'canales' else '' }}">
                         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg>
                         Canales
-                        <span class="badge-pronto">Pronto</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/registros" class="{{ 'activo' if active_page == 'registros' else '' }}">
+                    <a href="/bots/{{ current_bot.slug }}/registros" class="{{ 'activo' if active_page == 'registros' else '' }}">
                         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
                         Registros
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="deshabilitado" title="Llega en la Etapa 4 del proyecto">
+                    <a href="/bots/{{ current_bot.slug }}/configuracion" class="{{ 'activo' if active_page == 'configuracion' else '' }}">
                         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                         Configuración
-                        <span class="badge-pronto">Pronto</span>
                     </a>
                 </li>
             </ul>
+            {% endif %}
 
             <div class="sidebar-footer">
                 <a href="/logout">
@@ -59,7 +87,7 @@
 
         <div class="main-area">
             <header class="topbar">
-                <h1>{% block page_title %}Panel de TAMAGO{% endblock %}</h1>
+                <h1>{% block page_title %}Panel del Bot{% endblock %}</h1>
                 <div class="topbar-user">
                     {% if avatar_url %}
                     <img class="avatar" src="{{ avatar_url }}" alt="">

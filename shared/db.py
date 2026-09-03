@@ -119,12 +119,20 @@ class BotEvent(Base):
     Registro de actividad para la pantalla de "logs" del panel.
     Es un complemento visual a logs/tamago.log, no un reemplazo: el archivo
     sigue existiendo para depuración técnica local.
+
+    "bot_slug" identifica a qué bot pertenece cada evento (igual que en
+    BotPersonality y BotSettings), para poder filtrar los registros por
+    bot ahora que el panel administra varios. Esta columna se agregó
+    después de que la tabla ya existía en producción -- ver
+    scripts/migrate_add_bot_slug_to_bot_events.py para la migración que
+    la agrega sin perder datos.
     """
 
     __tablename__ = "bot_events"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    bot_slug = Column(String(50), nullable=False, server_default="tamago")
     event_type = Column(String(50), nullable=False)  # ej: "comando", "bloqueo", "error"
     description = Column(Text, nullable=False)
     guild_id = Column(String(32), nullable=True)
@@ -170,6 +178,47 @@ class BotPersonality(Base):
     forbidden_topics = Column(Text, nullable=True)
 
     presentation_message = Column(Text, nullable=True)
+
+    updated_at = Column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class BotSettings(Base):
+    """
+    Ajustes globales de cada bot que antes vivian en variables de
+    entorno (.env) o en memoria del proceso:
+
+    - "ai_enabled": interruptor para prender/apagar las respuestas de
+      IA sin desconectar al bot. Antes vivia solo en memoria (se
+      perdia al reiniciar); ahora sobrevive a un reinicio y se puede
+      cambiar tanto con el comando "!ia on/off" en Discord como desde
+      la pantalla "Configuracion" del panel web -- ambos comparten
+      esta misma fila.
+    - "allowed_channel_ids": IDs de los canales de Discord donde el
+      bot puede responder con IA, uno por linea. Antes vivia en la
+      variable de entorno AI_ALLOWED_CHANNEL_IDS; ahora se edita desde
+      la pantalla "Canales" del panel, sin tocar el .env ni redeployar.
+
+    Igual que "bot_slug" en BotPersonality, se deja preparado desde ya
+    para que un futuro segundo bot (Etapa 3) tenga su propia fila sin
+    tener que cambiar esta tabla.
+    """
+
+    __tablename__ = "bot_settings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    bot_slug = Column(String(50), nullable=False, unique=True)  # ej: "tamago"
+    ai_enabled = Column(Boolean, nullable=False, default=True)
+    allowed_channel_ids = Column(Text, nullable=True)
+
+    # URL publica de la foto de perfil de este bot en Discord. El bot
+    # mismo la guarda aqui cada vez que se conecta (ver bot/client.py,
+    # evento on_ready) -- el panel solo la lee para mostrarla en vez de
+    # un emoji generico. Columna agregada despues de que la tabla ya
+    # existia en produccion -- ver
+    # scripts/migrate_add_avatar_url_to_bot_settings.py.
+    avatar_url = Column(String(500), nullable=True)
 
     updated_at = Column(
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False

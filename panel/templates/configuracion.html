@@ -1,0 +1,54 @@
+{% extends "panel_base.html" %}
+{% block title %}Configuración de {{ current_bot.name }} — Panel de TAMAGO{% endblock %}
+{% block page_title %}Configuración{% endblock %}
+{% block content %}
+
+<div class="panel-card texto-izquierda">
+    <h2 class="titulo-icono">
+        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Configuración general
+    </h2>
+    <p class="descripcion">
+        Apaga o enciende las respuestas de IA de {{ current_bot.name }} en todo el servidor, sin
+        desconectar al bot. Los comandos como <code>!ping</code> siguen funcionando
+        igual aunque esto esté apagado. También puedes cambiarlo desde Discord con
+        <code>!ia on</code> / <code>!ia off</code> / <code>!ia estado</code> (solo
+        Administradores) — ambos lugares comparten el mismo interruptor.
+    </p>
+
+    {% if guardado %}
+    <div class="aviso-guardado">✅ Guardado.</div>
+    {% endif %}
+
+    <form method="post" action="/bots/{{ current_bot.slug }}/configuracion">
+        <div class="switch-wrap">
+            <label class="switch">
+                <input type="checkbox" name="ai_enabled" {% if ai_enabled %}checked{% endif %} onchange="this.form.submit()">
+                <span class="slider"></span>
+            </label>
+            <span class="switch-label">
+                {% if ai_enabled %}Respuestas de IA activadas ✅{% else %}Respuestas de IA desactivadas ⛔{% endif %}
+            </span>
+        </div>
+        <noscript><button type="submit" class="boton-guardar">Guardar</button></noscript>
+    </form>
+</div>
+
+<div class="panel-card texto-izquierda">
+    <h2 class="titulo-icono">
+        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg>
+        Canales autorizados
+    </h2>
+    <p class="descripcion">
+        {{ canales_count }} canal{{ "es" if canales_count != 1 else "" }} autorizado{{ "s" if canales_count != 1 else "" }} para respuestas de IA ahora mismo.
+    </p>
+    <a class="accion" href="/bots/{{ current_bot.slug }}/canales" style="display:inline-block; max-width: 260px;">
+        <div class="accion-titulo">
+            <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg>
+            Administrar canales
+        </div>
+        <div class="accion-detalle">Elegir en qué canales puede responder.</div>
+    </a>
+</div>
+
+{% endblock %}

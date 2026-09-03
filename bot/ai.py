@@ -10,15 +10,12 @@ independiente, sin recordar mensajes anteriores. Una memoria limitada y
 configurable llega en una etapa posterior del proyecto.
 """
 
-import logging
 from pathlib import Path
 
 from anthropic import AsyncAnthropic
 
 from .config import Config
 from .personalidad import ActivePersonality
-
-logger = logging.getLogger("tamago")
 
 _client: AsyncAnthropic | None = None
 

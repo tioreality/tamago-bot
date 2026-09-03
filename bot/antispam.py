@@ -5,39 +5,32 @@ Controles anti-spam y anti-bucle para las respuestas de IA de TAMAGO,
 siguiendo las reglas de seguridad del proyecto:
 - Tiempo de espera (cooldown) entre respuestas, por usuario y canal.
 - Limite global de respuestas por minuto (protege el costo de la API).
-- Lista de canales autorizados -- por defecto NINGUNO: hay que
-  configurar AI_ALLOWED_CHANNEL_IDS a mano en el .env antes de que
-  TAMAGO responda con IA en algun canal.
+- Lista de canales autorizados -- por defecto NINGUNO: hay que marcar
+  al menos un canal desde la pantalla "Canales" del panel web antes de
+  que TAMAGO responda con IA en algun canal.
 - Deteccion de mensajes repetidos (el mismo texto, seguido, del mismo
   usuario).
 - Interruptor global para apagar las respuestas de IA sin detener el
-  bot (comando "!ia off", solo para Administradores del servidor).
+  bot (comando "!ia off" en Discord, o desde la pantalla
+  "Configuracion" del panel -- ambos comparten el mismo valor).
 - Prevencion de bucles/spam entre bots: eso se resuelve en bot/client.py
   ignorando CUALQUIER mensaje enviado por un bot (incluido TAMAGO
   mismo), antes de llegar hasta aqui.
 
-Todo el estado vive en memoria del proceso (se reinicia si el bot se
-reinicia). Es suficiente para un solo bot en un solo proceso; si hiciera
-falta algo mas robusto (varios procesos a la vez) se podria mover a la
-base de datos mas adelante.
+El interruptor y la lista de canales ya NO viven en memoria: se leen de
+la base de datos en cada mensaje (ver bot/ajustes.py), por eso
+check_message() los recibe como parametros en vez de guardarlos aqui.
+Lo que SI sigue en memoria del proceso (se reinicia si el bot se
+reinicia) son los contadores de cooldown/limite por minuto/mensajes
+repetidos: son datos de corto plazo, no hace falta persistirlos.
 """
 
 import time
 from collections import deque
 
-_enabled = True
 _last_response_at: dict[tuple[int, int], float] = {}  # (channel_id, user_id) -> timestamp
 _recent_global_responses: deque[float] = deque()
 _last_message_by_user: dict[int, str] = {}
-
-
-def is_enabled() -> bool:
-    return _enabled
-
-
-def set_enabled(value: bool) -> None:
-    global _enabled
-    _enabled = value
 
 
 def _normalize(text: str) -> str:
@@ -49,6 +42,7 @@ def check_message(
     channel_id: int,
     user_id: int,
     content: str,
+    enabled: bool,
     allowed_channel_ids: frozenset[int],
     cooldown_seconds: int,
     max_responses_per_minute: int,
@@ -58,7 +52,7 @@ def check_message(
     Devuelve None si puede responder, o un texto corto con el motivo del
     bloqueo (para loguear/guardar) si no deberia responder.
     """
-    if not _enabled:
+    if not enabled:
         return "interruptor global de IA apagado"
 
     if channel_id not in allowed_channel_ids:

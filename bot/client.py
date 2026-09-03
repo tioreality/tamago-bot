@@ -10,7 +10,10 @@ directamente (@TAMAGO) en un canal autorizado, usando la personalidad
 guardada desde el panel web (bot/personalidad.py + bot/ai.py), con
 controles anti-spam (bot/antispam.py): cooldown, límite por minuto,
 lista de canales autorizados, mensajes repetidos, e interruptor global
-("!ia on" / "!ia off" / "!ia estado", solo para Administradores).
+("!ia on" / "!ia off" / "!ia estado", solo para Administradores). Los
+canales autorizados y el interruptor viven en la base de datos
+(bot/ajustes.py), compartidos con las pantallas "Canales" y
+"Configuración" del panel web.
 
 Todavía NO incluye (llegará en etapas posteriores, según el plan del
 proyecto):
@@ -27,6 +30,7 @@ from discord.ext import commands
 
 from . import antispam
 from .ai import generate_response
+from .ajustes import get_active_settings, set_ai_enabled, set_avatar_url
 from .config import Config
 from .personalidad import get_active_personality
 from shared.db import BotEvent, session_scope
@@ -38,6 +42,7 @@ def _log_blocked_event(config: Config, message: discord.Message, reason: str) ->
         with session_scope() as session:
             session.add(
                 BotEvent(
+                    bot_slug=config.bot_slug,
                     event_type="bloqueo",
                     description=f"Respuesta de IA bloqueada: {reason}",
                     guild_id=str(message.guild.id) if message.guild else None,
@@ -46,11 +51,11 @@ def _log_blocked_event(config: Config, message: discord.Message, reason: str) ->
                 )
             )
     except Exception as e:  # la base de datos puede fallar sin tumbar al bot
-        logging.getLogger("tamago").warning("No se pudo guardar el registro de bloqueo: %s", e)
+        logging.getLogger(config.bot_slug).warning("No se pudo guardar el registro de bloqueo: %s", e)
 
 
 async def _handle_ai_mention(bot: commands.Bot, config: Config, message: discord.Message) -> None:
-    logger = logging.getLogger("tamago")
+    logger = logging.getLogger(config.bot_slug)
 
     content = message.content
     for mention in (f"<@{bot.user.id}>", f"<@!{bot.user.id}>"):
@@ -67,11 +72,17 @@ async def _handle_ai_mention(bot: commands.Bot, config: Config, message: discord
         )
         return
 
+    # Los ajustes (interruptor + canales autorizados) viven en la base de
+    # datos -- se leen en cada mención para reflejar casi al instante
+    # cualquier cambio hecho desde el panel web o el comando "!ia".
+    settings = await asyncio.to_thread(get_active_settings, config.bot_slug)
+
     reason = antispam.check_message(
         channel_id=message.channel.id,
         user_id=message.author.id,
         content=content,
-        allowed_channel_ids=config.ai_allowed_channel_ids,
+        enabled=settings.ai_enabled,
+        allowed_channel_ids=settings.allowed_channel_ids,
         cooldown_seconds=config.ai_cooldown_seconds,
         max_responses_per_minute=config.ai_max_responses_per_minute,
     )
@@ -85,9 +96,9 @@ async def _handle_ai_mention(bot: commands.Bot, config: Config, message: discord
 
     # Las consultas a la base de datos son bloqueantes (no async): las
     # corremos en un hilo aparte para no congelar al bot mientras esperan.
-    personality = await asyncio.to_thread(get_active_personality, "tamago")
+    personality = await asyncio.to_thread(get_active_personality, config.bot_slug)
     if personality is None:
-        logger.warning("Todavía no hay personalidad guardada para 'tamago' en la base de datos.")
+        logger.warning("Todavía no hay personalidad guardada para '%s' en la base de datos.", config.bot_slug)
         return
 
     async with message.channel.typing():
@@ -102,7 +113,10 @@ async def _handle_ai_mention(bot: commands.Bot, config: Config, message: discord
             return
 
     antispam.register_response(channel_id=message.channel.id, user_id=message.author.id, content=content)
-    logger.info("TAMAGO respondió con IA a %s en #%s", message.author, message.channel)
+    # Igual que en "!ping" más abajo: usamos bot.user.name (el nombre real
+    # de la cuenta de Discord) en vez de "TAMAGO" a mano, porque este mismo
+    # código corre para cada bot (AJI, SABA, POTATO...) con su propio nombre.
+    logger.info("%s respondió con IA a %s en #%s", bot.user.name, message.author, message.channel)
     await message.channel.send(reply)
 
 
@@ -116,12 +130,21 @@ def build_bot(config: Config) -> commands.Bot:
     intents.message_content = True
 
     bot = commands.Bot(command_prefix=config.command_prefix, intents=intents)
-    logger = logging.getLogger("tamago")
+    logger = logging.getLogger(config.bot_slug)
 
     @bot.event
     async def on_ready():
         logger.info("Conectado como %s (ID: %s)", bot.user, bot.user.id)
         logger.info("Prefijo de comandos activo: %s", config.command_prefix)
+        # Guarda la foto de perfil real de este bot en la base de datos
+        # compartida, para que el panel web la muestre en vez de un
+        # emoji generico. Si falla (ej. la base de datos no responde en
+        # ese momento), no tumba al bot -- el panel simplemente sigue
+        # mostrando el emoji hasta el proximo reinicio.
+        try:
+            await asyncio.to_thread(set_avatar_url, config.bot_slug, str(bot.user.display_avatar.url))
+        except Exception as e:
+            logger.warning("No se pudo guardar la foto de perfil en la base de datos: %s", e)
         if config.guild_id:
             guild = bot.get_guild(config.guild_id)
             if guild:
@@ -158,31 +181,40 @@ def build_bot(config: Config) -> commands.Bot:
             await bot.invoke(ctx)
             return
 
-        # Solo respondemos con IA si mencionan directamente a TAMAGO.
+        # Solo respondemos con IA si mencionan directamente a este bot.
         if bot.user in message.mentions:
             await _handle_ai_mention(bot, config, message)
 
     @bot.command(name="ping")
     async def ping(ctx: commands.Context):
-        """Comando de prueba: confirma que TAMAGO está vivo y respondiendo."""
+        """Comando de prueba: confirma que este bot está vivo y respondiendo."""
         logger.info("Comando !ping usado por %s en #%s", ctx.author, ctx.channel)
-        await ctx.send(f"🏓 Pong! Soy TAMAGO y estoy en línea, {ctx.author.mention}.")
+        # Usamos el nombre real de la cuenta de Discord (bot.user.name) en
+        # vez de "TAMAGO" a mano: con varios bots corriendo este mismo
+        # código, cada uno debe presentarse con su propio nombre.
+        await ctx.send(f"🏓 Pong! Soy {bot.user.name} y estoy en línea, {ctx.author.mention}.")
 
     @bot.command(name="ia")
     @commands.has_permissions(administrator=True)
     async def ia_toggle(ctx: commands.Context, accion: str = "estado"):
-        """Enciende/apaga/consulta las respuestas de IA. Solo Administradores."""
+        """Enciende/apaga/consulta las respuestas de IA. Solo Administradores.
+
+        Guarda el valor en la base de datos (tabla bot_settings), no en
+        memoria: sobrevive a un reinicio del bot y queda sincronizado con
+        la pantalla "Configuración" del panel web.
+        """
         accion = accion.lower().strip()
         if accion in ("on", "encender", "activar"):
-            antispam.set_enabled(True)
+            await asyncio.to_thread(set_ai_enabled, config.bot_slug, True)
             logger.info("IA activada por %s", ctx.author)
             await ctx.send("🐣 Listo, ya puedo responder con IA de nuevo.")
         elif accion in ("off", "apagar", "desactivar"):
-            antispam.set_enabled(False)
+            await asyncio.to_thread(set_ai_enabled, config.bot_slug, False)
             logger.info("IA desactivada por %s", ctx.author)
             await ctx.send("🐣 Ok, dejo de responder con IA hasta que me vuelvan a encender.")
         elif accion in ("estado", "status"):
-            estado = "activada ✅" if antispam.is_enabled() else "desactivada ⛔"
+            settings = await asyncio.to_thread(get_active_settings, config.bot_slug)
+            estado = "activada ✅" if settings.ai_enabled else "desactivada ⛔"
             await ctx.send(f"🐣 Mi IA está {estado} ahora mismo.")
         else:
             await ctx.send("Uso: `!ia on`, `!ia off` o `!ia estado`.")

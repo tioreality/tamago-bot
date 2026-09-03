@@ -31,8 +31,8 @@ def main() -> int:
         print(f"[ERROR DE CONFIGURACIÓN] {e}")
         return 1
 
-    logger = setup_logging(config.log_level)
-    logger.info("Iniciando TAMAGO...")
+    logger = setup_logging(config.log_level, config.bot_slug)
+    logger.info("Iniciando %s...", config.bot_slug.upper())
 
     bot = build_bot(config)
 

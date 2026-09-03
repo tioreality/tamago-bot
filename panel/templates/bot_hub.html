@@ -1,0 +1,69 @@
+{% extends "panel_base.html" %}
+{% block title %}{{ current_bot.name }} — Panel de TAMAGO{% endblock %}
+{% block page_title %}{% if avatares.get(current_bot.slug) %}<img class="bot-avatar bot-avatar-title" src="{{ avatares.get(current_bot.slug) }}" alt="">{% else %}{{ current_bot.emoji }}{% endif %} {{ current_bot.name }}{% endblock %}
+{% block content %}
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg> Personalidad activa</div>
+        <div class="stat-value">
+            {% if personalidad_nombre %}
+                {{ personalidad_nombre }}
+            {% else %}
+                <span class="stat-pill warn">Sin configurar</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> Respuestas de IA</div>
+        <div class="stat-value">
+            {% if ai_enabled is none %}
+                <span class="stat-pill warn">Sin datos</span>
+            {% elif ai_enabled %}
+                <span class="stat-pill ok">● Activadas</span>
+            {% else %}
+                <span class="stat-pill error">● Desactivadas</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg> Canales autorizados</div>
+        <div class="stat-value">
+            {% if canales_count is none %}
+                <span class="stat-pill warn">Sin datos</span>
+            {% elif canales_count == 0 %}
+                <span class="stat-pill warn">Ninguno</span>
+            {% else %}
+                {{ canales_count }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="panel-card">
+    <h2>Acciones rápidas</h2>
+    <div class="acciones-rapidas">
+        <a class="accion" href="/bots/{{ current_bot.slug }}/personalidad">
+            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg> Editar personalidad</div>
+            <div class="accion-detalle">Cambia cómo habla y se comporta {{ current_bot.name }}.</div>
+        </a>
+        <a class="accion" href="/bots/{{ current_bot.slug }}/canales">
+            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg> Canales</div>
+            <div class="accion-detalle">Elige dónde puede responder {{ current_bot.name }}.</div>
+        </a>
+        <a class="accion" href="/bots/{{ current_bot.slug }}/registros">
+            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg> Ver registros</div>
+            <div class="accion-detalle">Últimos bloqueos y eventos de este bot.</div>
+        </a>
+        <a class="accion" href="/bots/{{ current_bot.slug }}/configuracion">
+            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Configuración</div>
+            <div class="accion-detalle">Enciende o apaga las respuestas de IA.</div>
+        </a>
+    </div>
+</div>
+
+<a href="/dashboard" class="boton-volver">← Todos los bots</a>
+
+{% endblock %}

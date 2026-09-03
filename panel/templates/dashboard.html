@@ -16,33 +16,57 @@
     </div>
 
     <div class="stat-card">
-        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg> Personalidad activa</div>
-        <div class="stat-value">
-            {% if personalidad_nombre %}
-                {{ personalidad_nombre }}
-            {% else %}
-                <span class="stat-pill warn">Sin configurar</span>
-            {% endif %}
-        </div>
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sesión activa</div>
+        <div class="stat-value" style="font-size: 1.05rem;">{{ username }}</div>
     </div>
 
     <div class="stat-card">
-        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sesión activa</div>
-        <div class="stat-value" style="font-size: 1.05rem;">{{ username }}</div>
+        <div class="stat-label"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M17 11l2 2 4-4"/><path d="M1 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg> Bots administrados</div>
+        <div class="stat-value">{{ bots_resumen|length }}</div>
     </div>
 </div>
 
 <div class="panel-card">
-    <h2>Acciones rápidas</h2>
-    <div class="acciones-rapidas">
-        <a class="accion" href="/registros">
-            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg> Ver registros</div>
-            <div class="accion-detalle">Últimos bloqueos y eventos del bot.</div>
+    <h2>Tus bots</h2>
+    <p class="descripcion">Elige un bot para editar su personalidad, canales, configuración o ver sus registros.</p>
+    <div class="bots-grid">
+        {% for item in bots_resumen %}
+        <a class="bot-card" href="/bots/{{ item.bot.slug }}">
+            <div class="bot-card-header">
+                {% if avatares.get(item.bot.slug) %}
+                <img class="bot-avatar bot-avatar-card" src="{{ avatares.get(item.bot.slug) }}" alt="">
+                {% else %}
+                <span class="bot-card-emoji">{{ item.bot.emoji }}</span>
+                {% endif %}
+                {{ item.bot.name }}
+            </div>
+            <div class="bot-card-stats">
+                <span>
+                    {% if item.personalidad_nombre %}
+                        Personalidad: {{ item.personalidad_nombre }}
+                    {% else %}
+                        <span class="stat-pill warn">Personalidad sin configurar</span>
+                    {% endif %}
+                </span>
+                <span>
+                    {% if item.ai_enabled is none %}
+                        <span class="stat-pill warn">IA: sin datos</span>
+                    {% elif item.ai_enabled %}
+                        <span class="stat-pill ok">● IA activada</span>
+                    {% else %}
+                        <span class="stat-pill error">● IA desactivada</span>
+                    {% endif %}
+                </span>
+                <span>
+                    {% if item.canales_count is none %}
+                        Canales: sin datos
+                    {% else %}
+                        {{ item.canales_count }} canal{{ "es" if item.canales_count != 1 else "" }} autorizado{{ "s" if item.canales_count != 1 else "" }}
+                    {% endif %}
+                </span>
+            </div>
         </a>
-        <a class="accion" href="/personalidad">
-            <div class="accion-titulo"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg> Editar personalidad</div>
-            <div class="accion-detalle">Cambia cómo habla y se comporta TAMAGO.</div>
-        </a>
+        {% endfor %}
     </div>
 </div>
 
@@ -50,9 +74,8 @@
     <h2>Próximamente</h2>
     <p class="descripcion">Estas secciones llegan en las siguientes etapas del proyecto.</p>
     <ul class="proximamente-lista">
-        <li><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg> Configurar canales y permisos por servidor (Etapa 3)</li>
         <li><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> Conversaciones controladas entre bots (Etapa 3)</li>
-        <li><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg> Apagar / reiniciar el bot desde aquí (Etapa 4)</li>
+        <li><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg> Apagar / reiniciar cada bot desde aquí (Etapa 4)</li>
     </ul>
 </div>
 

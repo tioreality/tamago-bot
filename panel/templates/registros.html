@@ -1,5 +1,5 @@
 {% extends "panel_base.html" %}
-{% block title %}Registros — Panel de TAMAGO{% endblock %}
+{% block title %}Registros de {{ current_bot.name }} — Panel de TAMAGO{% endblock %}
 {% block page_title %}Registros{% endblock %}
 {% block content %}
 
@@ -9,7 +9,7 @@
         Actividad reciente
     </h2>
     <p class="descripcion">
-        Últimos 50 eventos guardados por TAMAGO (respuestas bloqueadas, errores, etc.).
+        Últimos 50 eventos guardados por {{ current_bot.name }} (respuestas bloqueadas, errores, etc.).
         Complemento visual a los logs técnicos del servicio en Railway.
     </p>
 

@@ -1,24 +1,24 @@
 {% extends "panel_base.html" %}
-{% block title %}Personalidad de TAMAGO — Panel de TAMAGO{% endblock %}
+{% block title %}Personalidad de {{ current_bot.name }} — Panel de TAMAGO{% endblock %}
 {% block page_title %}Personalidad{% endblock %}
 {% block content %}
 
 <div class="panel-card texto-izquierda">
-    <h2 class="titulo-icono"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg> Personalidad de TAMAGO</h2>
+    <h2 class="titulo-icono">{% if avatares.get(current_bot.slug) %}<img class="bot-avatar bot-avatar-header" src="{{ avatares.get(current_bot.slug) }}" alt="">{% else %}<svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>{% endif %} Personalidad de {{ current_bot.name }}</h2>
     <p class="descripcion">
-        Este texto es lo que TAMAGO usa como base para responder con IA.
+        Este texto es lo que {{ current_bot.name }} usa como base para responder con IA.
         Los cambios se guardan directo en la base de datos — el bot los
         toma en su próxima respuesta, sin reiniciar nada.
     </p>
 
     {% if guardado %}
-    <div class="aviso-guardado">✅ Guardado. TAMAGO ya está usando esta personalidad.</div>
+    <div class="aviso-guardado">✅ Guardado. {{ current_bot.name }} ya está usando esta personalidad.</div>
     {% endif %}
     {% if error_validacion %}
     <div class="aviso-error">⚠️ {{ error_validacion }}</div>
     {% endif %}
 
-    <form method="post" action="/personalidad" class="form-personalidad">
+    <form method="post" action="/bots/{{ current_bot.slug }}/personalidad" class="form-personalidad">
         <label for="name">Nombre del bot</label>
         <input type="text" id="name" name="name" value="{{ personalidad.name }}" required>
 
@@ -34,8 +34,8 @@
         <label for="personality">Personalidad (texto completo que recibe la IA)</label>
         <textarea id="personality" name="personality" rows="16" required>{{ personalidad.personality }}</textarea>
         <p class="ayuda">
-            Este es el texto principal: define quién es TAMAGO, cómo habla y cómo se
-            comporta. Escríbelo tal como quieras que TAMAGO lo siga al pie de la letra.
+            Este es el texto principal: define quién es {{ current_bot.name }}, cómo habla y cómo se
+            comporta. Escríbelo tal como quieras que {{ current_bot.name }} lo siga al pie de la letra.
         </p>
 
         <label for="allowed_topics">Temas permitidos</label>
@@ -47,7 +47,7 @@
         <label for="presentation_message">Mensaje de presentación</label>
         <textarea id="presentation_message" name="presentation_message" rows="2">{{ personalidad.presentation_message }}</textarea>
         <p class="ayuda">
-            Lo que TAMAGO diría al presentarse en un canal por primera vez.
+            Lo que {{ current_bot.name }} diría al presentarse en un canal por primera vez.
         </p>
 
         <button type="submit" class="boton-guardar">Guardar cambios</button>
